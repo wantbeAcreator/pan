@@ -14,13 +14,20 @@ import (
 
 var startupLog *os.File
 
+func logWrite(s string) {
+	startupLog.WriteString(s)
+	startupLog.Sync()
+}
+
 func init() {
 	var err error
 	startupLog, err = os.Create("startup.log")
 	if err != nil {
 		startupLog = os.Stderr
 	}
-	startupLog.WriteString(fmt.Sprintf("=== pan started at %s ===\n", time.Now().Format(time.RFC3339)))
+	logWrite(fmt.Sprintf("=== pan started at %s ===\n", time.Now().Format(time.RFC3339)))
+
+	os.Setenv("FYNE_RENDERER", "software")
 }
 
 func main() {
@@ -108,7 +115,7 @@ func cmdGUI() {
 	defer func() {
 		if r := recover(); r != nil {
 			msg := fmt.Sprintf("panic: %v", r)
-			fmt.Fprintln(startupLog, msg)
+			logWrite(msg + "\n")
 			dialog.ShowError("Pan Error", msg)
 		}
 		if startupLog != nil && startupLog != os.Stderr {
@@ -116,7 +123,7 @@ func cmdGUI() {
 		}
 	}()
 
-	fmt.Fprintln(startupLog, "starting GUI...")
+	logWrite("step1: entering gui.Start()...\n")
 	gui.Start()
 
 	if startupLog != nil && startupLog != os.Stderr {

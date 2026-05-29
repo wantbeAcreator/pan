@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"fmt"
+	"os"
 	"pan/internal/oss"
 
 	"fyne.io/fyne/v2"
@@ -21,20 +23,24 @@ type App struct {
 }
 
 func Start() {
+	fmt.Fprintln(os.Stderr, "gui: creating app...")
 	guiApp := &App{
 		fyneApp: app.NewWithID("pan"),
 	}
 
 	guiApp.fyneApp.Settings().SetTheme(theme.LightTheme())
 
+	fmt.Fprintln(os.Stderr, "gui: creating window...")
 	guiApp.window = guiApp.fyneApp.NewWindow("Pan - OSS File Manager")
 	guiApp.window.Resize(fyne.NewSize(900, 600))
 
 	guiApp.addrBar = widget.NewLabel("/")
 	guiApp.status = widget.NewLabel("Connecting...")
 
+	fmt.Fprintln(os.Stderr, "gui: connecting OSS...")
 	client, err := oss.NewClient()
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "gui: OSS error: %v\n", err)
 		dialog.ShowError(err, guiApp.window)
 		guiApp.status.SetText("Connection failed")
 		guiApp.window.ShowAndRun()
@@ -42,6 +48,7 @@ func Start() {
 	}
 	guiApp.client = client
 
+	fmt.Fprintln(os.Stderr, "gui: building browser...")
 	guiApp.browser = NewBrowser(client, guiApp.onNavigate, guiApp.onStatus, guiApp.onDoubleClick)
 
 	backBtn := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
@@ -77,6 +84,7 @@ func Start() {
 	guiApp.window.SetContent(content)
 	guiApp.refresh()
 
+	fmt.Fprintln(os.Stderr, "gui: starting main loop...")
 	guiApp.window.ShowAndRun()
 }
 
