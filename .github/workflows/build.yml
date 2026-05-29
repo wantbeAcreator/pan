@@ -27,6 +27,10 @@ jobs:
             BucketName      = "${{ secrets.OSS_BUCKET }}"
           )
           EOF
+      - name: Verify config
+        run: |
+          echo "=== Checking config.go (hiding values) ==="
+          grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
       - name: Install deps
         run: |
           sudo apt-get update
@@ -56,6 +60,10 @@ jobs:
             BucketName      = "${{ secrets.OSS_BUCKET }}"
           )
           EOF
+      - name: Verify config
+        run: |
+          echo "=== Checking config.go (hiding values) ==="
+          grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
       - name: Install mingw-w64
         run: |
           sudo apt-get update
@@ -85,6 +93,10 @@ jobs:
             BucketName      = "${{ secrets.OSS_BUCKET }}"
           )
           EOF
+      - name: Verify config
+        run: |
+          echo "=== Checking config.go (hiding values) ==="
+          grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
       - name: Build macOS
         run: make darwin-native
       - uses: actions/upload-artifact@v4
