@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"pan/internal/gui"
 	"pan/internal/osdetect"
 	"pan/internal/oss"
-	"pan/internal/webui"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func printUsage() {
 	fmt.Println("usage:")
 	fmt.Println("  pan down          download all files for current OS")
 	fmt.Println("  pan down --os <os>  download files for a specific OS (windows/linux)")
-	fmt.Println("  pan gui          open browser-based download interface")
+	fmt.Println("  pan gui          open desktop file manager")
 	fmt.Println("  pan up <file>     upload a file for current OS")
 	fmt.Println("  pan up --os <os> <file>  upload a file for a specific OS")
 }
@@ -92,9 +92,8 @@ func cmdUp() {
 }
 
 func cmdGUI() {
-	fmt.Println("opening browser...")
-	fmt.Println("press Ctrl+C to stop")
-	if err := webui.Start(); err != nil {
+	fmt.Println("starting Pan GUI...")
+	if err := gui.Start(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

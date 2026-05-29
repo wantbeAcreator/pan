@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libgl1-mesa-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev pkg-config
+      - name: Build Linux
+        run: make linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pan-linux-amd64
+          path: dist/pan-linux-amd64
+
+  windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Install mingw-w64
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64-x86-64
+      - name: Build Windows
+        run: make windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pan-windows-amd64
+          path: dist/pan-windows-amd64.exe
+
+  darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Build macOS
+        run: make darwin-native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pan-darwin-amd64
+          path: dist/pan-darwin-amd64
