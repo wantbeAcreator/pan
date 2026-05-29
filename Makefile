@@ -9,12 +9,12 @@ dist/pan-linux-amd64:
 
 windows:
 	@if command -v fyne-cross >/dev/null 2>&1; then \
-		fyne-cross windows -arch=amd64 -app-id pan -ldflags="-s -w -H windowsgui"; \
+		fyne-cross windows -arch=amd64 -app-id pan -ldflags="-s -w"; \
 		mkdir -p dist; \
 		cp fyne-cross/dist/windows-amd64/pan.exe dist/pan-windows-amd64.exe; \
 		echo "Done: dist/pan-windows-amd64.exe"; \
 	elif command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1; then \
-		GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -ldflags="-s -w -H windowsgui" -o dist/pan-windows-amd64.exe .; \
+		GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -ldflags="-s -w" -o dist/pan-windows-amd64.exe .; \
 	else \
 		echo "Install fyne-cross (go install github.com/fyne-io/fyne-cross@latest) or mingw-w64"; \
 		exit 1; \

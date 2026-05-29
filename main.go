@@ -4,11 +4,24 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"pan/internal/dialog"
 	"pan/internal/gui"
 	"pan/internal/osdetect"
 	"pan/internal/oss"
 )
+
+var startupLog *os.File
+
+func init() {
+	var err error
+	startupLog, err = os.Create("startup.log")
+	if err != nil {
+		startupLog = os.Stderr
+	}
+	startupLog.WriteString(fmt.Sprintf("=== pan started at %s ===\n", time.Now().Format(time.RFC3339)))
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -92,11 +105,21 @@ func cmdUp() {
 }
 
 func cmdGUI() {
-	fmt.Println("starting Pan GUI...")
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Fprintf(os.Stderr, "gui panic: %v\n", r)
+			msg := fmt.Sprintf("panic: %v", r)
+			fmt.Fprintln(startupLog, msg)
+			dialog.ShowError("Pan Error", msg)
+		}
+		if startupLog != nil && startupLog != os.Stderr {
+			startupLog.Close()
 		}
 	}()
+
+	fmt.Fprintln(startupLog, "starting GUI...")
 	gui.Start()
+
+	if startupLog != nil && startupLog != os.Stderr {
+		startupLog.Close()
+	}
 }
