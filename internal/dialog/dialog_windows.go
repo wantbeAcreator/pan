@@ -3,14 +3,25 @@
 package dialog
 
 import (
+	"fmt"
+	"os"
 	"syscall"
 	"unsafe"
 )
 
 func ShowError(title, msg string) {
-	user32, _ := syscall.LoadDLL("user32.dll")
+	user32, err := syscall.LoadDLL("user32.dll")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[%s] %s\n", title, msg)
+		return
+	}
 	defer user32.Release()
-	msgBox, _ := user32.FindProc("MessageBoxW")
+
+	msgBox, err := user32.FindProc("MessageBoxW")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[%s] %s\n", title, msg)
+		return
+	}
 
 	titlePtr, _ := syscall.UTF16PtrFromString(title)
 	msgPtr, _ := syscall.UTF16PtrFromString(msg)

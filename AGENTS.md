@@ -18,7 +18,6 @@ Cross-compiles `dist/pan-linux-amd64` and `dist/pan-windows-amd64.exe`.
 - `internal/oss/` — OSS client: ListAll, DownloadAll (concurrent), DownloadFile, Upload
 - `internal/osdetect/` — wraps `runtime.GOOS`
 - `internal/oss/config.go` — hardcoded credentials (single-user tool)
-- `internal/webui/` — embedded web UI for `pan gui` (SSE progress, browser-based)
 
 ## OSS structure
 

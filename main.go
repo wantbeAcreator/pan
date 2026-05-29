@@ -51,6 +51,14 @@ func main() {
 	}
 }
 
+func validateOS(targetOS string) {
+	validOS := map[string]bool{"windows": true, "linux": true, "darwin": true}
+	if !validOS[targetOS] {
+		fmt.Fprintf(os.Stderr, "unsupported OS: %s (valid: windows, linux, darwin)\n", targetOS)
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Println("usage:")
 	fmt.Println("  pan down          download all files for current OS")
@@ -67,6 +75,7 @@ func cmdDown() {
 	if len(args) >= 2 && args[0] == "--os" {
 		targetOS = args[1]
 	}
+	validateOS(targetOS)
 
 	client, err := oss.NewClient()
 	if err != nil {
@@ -89,6 +98,7 @@ func cmdUp() {
 		targetOS = args[1]
 		args = args[2:]
 	}
+	validateOS(targetOS)
 
 	if len(args) < 1 {
 		fmt.Fprintln(os.Stderr, "missing file argument")

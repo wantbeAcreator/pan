@@ -12,20 +12,21 @@ import (
 )
 
 type Browser struct {
-	client       *oss.Client
-	view         *widget.Table
-	items        []oss.ObjectInfo
-	prefix       string
-	history      []string
-	selected     map[int]bool
-	onNav        func(string)
-	onStatus     func(string)
+	client        *oss.Client
+	view          *widget.Table
+	items         []oss.ObjectInfo
+	prefix        string
+	history       []string
+	selected      map[int]bool
+	onNav         func(string)
+	onStatus      func(string)
 	onDoubleClick func(oss.ObjectInfo)
-	lastClickRow int
-	lastClickAt  time.Time
+	onError       func(error)
+	lastClickRow  int
+	lastClickAt   time.Time
 }
 
-func NewBrowser(client *oss.Client, onNav func(string), onStatus func(string), onDbl func(oss.ObjectInfo)) *Browser {
+func NewBrowser(client *oss.Client, onNav func(string), onStatus func(string), onDbl func(oss.ObjectInfo), onError func(error)) *Browser {
 	b := &Browser{
 		client:        client,
 		prefix:        "",
@@ -33,6 +34,7 @@ func NewBrowser(client *oss.Client, onNav func(string), onStatus func(string), o
 		onNav:         onNav,
 		onStatus:      onStatus,
 		onDoubleClick: onDbl,
+		onError:       onError,
 	}
 
 	b.view = widget.NewTable(
@@ -158,7 +160,15 @@ func (b *Browser) NavigateTo(name string) {
 			newPrefix = b.prefix + name + "/"
 		}
 	}
-	b.Load(newPrefix)
+	if err := b.Load(newPrefix); err != nil {
+		if b.onError != nil {
+			b.onError(err)
+		}
+		// 回退历史，因为导航失败了
+		if len(b.history) > 0 {
+			b.history = b.history[:len(b.history)-1]
+		}
+	}
 }
 
 func (b *Browser) NavigateToFile(item oss.ObjectInfo) {
@@ -170,13 +180,17 @@ func (b *Browser) NavigateToFile(item oss.ObjectInfo) {
 func (b *Browser) GoBack() {
 	if len(b.history) == 0 {
 		if b.prefix != "" {
-			b.Load("")
+			if err := b.Load(""); err != nil && b.onError != nil {
+				b.onError(err)
+			}
 		}
 		return
 	}
 	prev := b.history[len(b.history)-1]
 	b.history = b.history[:len(b.history)-1]
-	b.Load(prev)
+	if err := b.Load(prev); err != nil && b.onError != nil {
+		b.onError(err)
+	}
 }
 
 func (b *Browser) handleDoubleClick(idx int) {

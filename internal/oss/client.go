@@ -50,7 +50,7 @@ func (c *Client) ListAll(prefix string) ([]string, error) {
 			return nil, fmt.Errorf("list objects with prefix %q: %w", prefix, err)
 		}
 		for _, obj := range res.Objects {
-			if obj.Key[len(obj.Key)-1] == '/' {
+			if len(obj.Key) == 0 || obj.Key[len(obj.Key)-1] == '/' {
 				continue
 			}
 			keys = append(keys, obj.Key)
@@ -130,9 +130,17 @@ func (c *Client) DownloadAll(prefix, dstDir string) error {
 		go func(k string) {
 			defer wg.Done()
 			localName := k[len(prefix):]
-			localPath := filepath.Join(dstDir, localName)
+			localPath := filepath.Join(dstDir, filepath.Clean("/"+localName))
+			if !strings.HasPrefix(localPath, filepath.Clean(dstDir)+string(os.PathSeparator)) &&
+				localPath != filepath.Clean(dstDir) {
+				errCh <- fmt.Errorf("skipping suspicious path: %s", k)
+				return
+			}
 			if dir := filepath.Dir(localPath); dir != "." {
-				os.MkdirAll(dir, 0755)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					errCh <- fmt.Errorf("mkdir %s: %w", dir, err)
+					return
+				}
 			}
 			if err := c.bucket.GetObjectToFile(k, localPath); err != nil {
 				errCh <- fmt.Errorf("download %s: %w", k, err)
@@ -156,14 +164,18 @@ func (c *Client) DownloadAll(prefix, dstDir string) error {
 
 func (c *Client) DownloadFile(key, localPath string) error {
 	if dir := filepath.Dir(localPath); dir != "." {
-		os.MkdirAll(dir, 0755)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", dir, err)
+		}
 	}
 	return c.bucket.GetObjectToFile(key, localPath)
 }
 
 func (c *Client) DownloadFileWithProgress(key, localPath string, onProgress func(downloaded, total int64)) error {
 	if dir := filepath.Dir(localPath); dir != "." {
-		os.MkdirAll(dir, 0755)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", dir, err)
+		}
 	}
 	body, err := c.bucket.GetObject(key)
 	if err != nil {
@@ -171,7 +183,10 @@ func (c *Client) DownloadFileWithProgress(key, localPath string, onProgress func
 	}
 	defer body.Close()
 
-	totalSize, _ := c.Size(key)
+	totalSize := int64(-1)
+	if header, err := c.bucket.GetObjectMeta(key); err == nil {
+		fmt.Sscanf(header.Get("Content-Length"), "%d", &totalSize)
+	}
 	f, err := os.Create(localPath)
 	if err != nil {
 		return err
@@ -183,7 +198,9 @@ func (c *Client) DownloadFileWithProgress(key, localPath string, onProgress func
 	for {
 		n, readErr := body.Read(buf)
 		if n > 0 {
-			f.Write(buf[:n])
+			if _, err := f.Write(buf[:n]); err != nil {
+				return err
+			}
 			downloaded += int64(n)
 			if onProgress != nil {
 				onProgress(downloaded, totalSize)

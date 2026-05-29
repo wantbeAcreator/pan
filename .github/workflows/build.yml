@@ -19,14 +19,14 @@ jobs:
       - name: Generate config
         run: |
           cat > internal/oss/config.go << 'EOF'
-          package oss
-          const (
-            Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-            AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-            AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-            BucketName      = "${{ secrets.OSS_BUCKET }}"
-          )
-          EOF
+package oss
+const (
+    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
+    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
+    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
+    BucketName      = "${{ secrets.OSS_BUCKET }}"
+)
+EOF
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="
@@ -52,14 +52,14 @@ jobs:
       - name: Generate config
         run: |
           cat > internal/oss/config.go << 'EOF'
-          package oss
-          const (
-            Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-            AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-            AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-            BucketName      = "${{ secrets.OSS_BUCKET }}"
-          )
-          EOF
+package oss
+const (
+    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
+    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
+    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
+    BucketName      = "${{ secrets.OSS_BUCKET }}"
+)
+EOF
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="
@@ -85,14 +85,14 @@ jobs:
       - name: Generate config
         run: |
           cat > internal/oss/config.go << 'EOF'
-          package oss
-          const (
-            Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-            AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-            AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-            BucketName      = "${{ secrets.OSS_BUCKET }}"
-          )
-          EOF
+package oss
+const (
+    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
+    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
+    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
+    BucketName      = "${{ secrets.OSS_BUCKET }}"
+)
+EOF
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="

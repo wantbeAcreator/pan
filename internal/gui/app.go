@@ -49,7 +49,9 @@ func Start() {
 	guiApp.client = client
 
 	fmt.Fprintln(os.Stderr, "gui: building browser...")
-	guiApp.browser = NewBrowser(client, guiApp.onNavigate, guiApp.onStatus, guiApp.onDoubleClick)
+	guiApp.browser = NewBrowser(client, guiApp.onNavigate, guiApp.onStatus, guiApp.onDoubleClick, func(err error) {
+		dialog.ShowError(err, guiApp.window)
+	})
 
 	backBtn := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
 		guiApp.browser.GoBack()
