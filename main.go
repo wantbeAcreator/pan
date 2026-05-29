@@ -93,5 +93,10 @@ func cmdUp() {
 
 func cmdGUI() {
 	fmt.Println("starting Pan GUI...")
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "gui panic: %v\n", r)
+		}
+	}()
 	gui.Start()
 }
