@@ -93,8 +93,5 @@ func cmdUp() {
 
 func cmdGUI() {
 	fmt.Println("starting Pan GUI...")
-	if err := gui.Start(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	gui.Start()
 }

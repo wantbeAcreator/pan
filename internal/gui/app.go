@@ -20,15 +20,9 @@ type App struct {
 	status   *widget.Label
 }
 
-func Start() error {
-	client, err := oss.NewClient()
-	if err != nil {
-		return err
-	}
-
+func Start() {
 	guiApp := &App{
 		fyneApp: app.NewWithID("pan"),
-		client:  client,
 	}
 
 	guiApp.fyneApp.Settings().SetTheme(theme.LightTheme())
@@ -37,7 +31,16 @@ func Start() error {
 	guiApp.window.Resize(fyne.NewSize(900, 600))
 
 	guiApp.addrBar = widget.NewLabel("/")
-	guiApp.status = widget.NewLabel("Ready")
+	guiApp.status = widget.NewLabel("Connecting...")
+
+	client, err := oss.NewClient()
+	if err != nil {
+		dialog.ShowError(err, guiApp.window)
+		guiApp.status.SetText("Connection failed")
+		guiApp.window.ShowAndRun()
+		return
+	}
+	guiApp.client = client
 
 	guiApp.browser = NewBrowser(client, guiApp.onNavigate, guiApp.onStatus, guiApp.onDoubleClick)
 
@@ -75,7 +78,6 @@ func Start() error {
 	guiApp.refresh()
 
 	guiApp.window.ShowAndRun()
-	return nil
 }
 
 func (a *App) onNavigate(prefix string) {
