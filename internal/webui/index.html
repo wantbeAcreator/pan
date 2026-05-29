@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f2f5;color:#333;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px;width:640px;max-width:95vw}
+h1{font-size:20px;font-weight:600;margin-bottom:24px}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.row label{width:80px;text-align:right;font-size:14px;color:#666;flex-shrink:0}
+select,input[type=text]{flex:1;height:36px;border:1px solid #d9d9d9;border-radius:6px;padding:0 12px;font-size:14px;outline:none}
+select:focus,input:focus{border-color:#1677ff;box-shadow:0 0 0 2px rgba(22,119,255,.1)}
+.btn{height:36px;padding:0 16px;border:none;border-radius:6px;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn-primary{background:#1677ff;color:#fff}
+.btn-primary:hover{background:#4096ff}
+.btn-primary:disabled{background:#91caff;cursor:not-allowed}
+.btn-default{background:#fff;color:#333;border:1px solid #d9d9d9}
+.btn-default:hover{border-color:#1677ff;color:#1677ff}
+#start{width:100%;height:44px;font-size:16px;margin:8px 0 16px}
+#log{border:1px solid #eee;border-radius:8px;background:#fafafa;padding:16px;max-height:300px;overflow-y:auto;font-family:"SF Mono",Consolas,monospace;font-size:13px;line-height:1.8;display:none}
+#log .ok{color:#52c41a}
+#log .err{color:#ff4d4f}
+#log .info{color:#8c8c8c}
+#stats{margin-top:12px;font-size:14px;color:#8c8c8c;display:none}
+.empty{text-align:center;color:#999;padding:32px 0;font-size:14px}
+html{visibility:visible!important}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Pan</h1>
+<div class="row">
+<label>目标系统</label>
+<select id="os"><option value="linux">Linux</option><option value="windows">Windows</option></select>
+</div>
+<div class="row">
+<label>下载到</label>
+<input type="text" id="dir" placeholder="默认: 当前目录">
+</div>
+<button id="start" class="btn btn-primary">开始下载</button>
+<div id="log"></div>
+<div id="stats"></div>
+</div>
+<script>
+var es = new EventSource("/api/events");
+var log=document.getElementById("log"),stats=document.getElementById("stats"),btn=document.getElementById("start");
+var total=0,ok=0,err=0;
+
+fetch("/api/os").then(r=>r.json()).then(d=>document.getElementById("os").value=d.os);
+
+btn.onclick=function(){
+log.style.display="block";stats.style.display="none";
+log.innerHTML='<div class="info">正在获取文件列表...</div>';
+btn.disabled=true;ok=0;err=0;
+fetch("/api/download",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({os:document.getElementById("os").value,dir:document.getElementById("dir").value||"."})
+}).then(r=>r.json()).then(d=>{
+if(d.error){log.innerHTML+='<div class="err">'+d.error+'</div>';btn.disabled=false;return}
+total=d.files.length;
+if(total==0){log.innerHTML+='<div class="info">没有找到文件</div>';btn.disabled=false;return}
+log.innerHTML="";
+d.files.forEach(f=>{log.innerHTML+='<div>'+f+' &nbsp;<span class="info">等待中</span></div>'});
+}).catch(e=>{log.innerHTML+='<div class="err">'+e+'</div>';btn.disabled=false});
+};
+
+es.onmessage=function(e){
+var d=JSON.parse(e.data);
+if(d.type=="start"){var el=log.children[d.index];if(el)el.innerHTML=d.name+' &nbsp;<span class="info">下载中...</span>'}
+else if(d.type=="ok"){var el=log.children[d.index];if(el)el.innerHTML=d.name+' &nbsp;<span class="ok">完成</span>';ok++;checkDone()}
+else if(d.type=="err"){var el=log.children[d.index];if(el)el.innerHTML=d.name+' &nbsp;<span class="err">'+d.err+'</span>';err++;checkDone()}
+};
+
+function checkDone(){if(ok+err==total){btn.disabled=false;stats.style.display="block";stats.innerHTML="完成: "+ok+"/"+total+(err>0?', 失败: '+err:'')}}
+</script>
+</body>
+</html>
