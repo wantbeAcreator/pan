@@ -55,7 +55,7 @@ jobs:
           msystem: MINGW64
           install: mingw-w64-x86_64-gcc
       - name: Generate config
-        shell: msys2 {0}
+        shell: bash
         run: |
           printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
             "${{ secrets.OSS_ENDPOINT }}" \
@@ -64,15 +64,17 @@ jobs:
             "${{ secrets.OSS_BUCKET }}" \
             > internal/oss/config.go
       - name: Verify config
-        shell: msys2 {0}
+        shell: bash
         run: |
           echo "=== Checking config.go (hiding values) ==="
           grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
       - name: Build Windows
-        shell: msys2 {0}
+        shell: pwsh
         run: |
-          mkdir -p dist
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -ldflags="-s -w" -o dist/pan-windows-amd64.exe .
+          New-Item -ItemType Directory -Force -Path dist
+          $env:CGO_ENABLED = "1"
+          $env:CC = "C:\msys64\mingw64\bin\gcc.exe"
+          go build -ldflags="-s -w" -o dist\pan-windows-amd64.exe .
       - uses: actions/upload-artifact@v4
         with:
           name: pan-windows-amd64
