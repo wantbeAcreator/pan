@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"os"
 	"pan/internal/oss"
 	"sort"
 	"time"
@@ -125,9 +126,15 @@ func NewBrowser(client *oss.Client, onNav func(string), onStatus func(string), o
 }
 
 func (b *Browser) Load(prefix string) error {
+	fmt.Fprintf(os.Stderr, "browser: Load(%q)\n", prefix)
 	items, err := b.client.ListDir(prefix)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "browser: ListDir error: %v\n", err)
 		return fmt.Errorf("load %q: %w", prefix, err)
+	}
+	fmt.Fprintf(os.Stderr, "browser: ListDir returned %d items\n", len(items))
+	for i, item := range items {
+		fmt.Fprintf(os.Stderr, "  [%d] dir=%v name=%q key=%q\n", i, item.IsDir, item.Name, item.Key)
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -147,6 +154,7 @@ func (b *Browser) Load(prefix string) error {
 }
 
 func (b *Browser) NavigateTo(name string) {
+	fmt.Fprintf(os.Stderr, "browser: NavigateTo(%q), current prefix=%q\n", name, b.prefix)
 	if b.prefix != "" || name != ".." {
 		b.history = append(b.history, b.prefix)
 	}
@@ -194,10 +202,12 @@ func (b *Browser) GoBack() {
 }
 
 func (b *Browser) handleDoubleClick(idx int) {
+	fmt.Fprintf(os.Stderr, "browser: handleDoubleClick(%d), items=%d\n", idx, len(b.items))
 	if idx >= len(b.items) {
 		return
 	}
 	item := b.items[idx]
+	fmt.Fprintf(os.Stderr, "browser: double-click item: dir=%v name=%q key=%q\n", item.IsDir, item.Name, item.Key)
 	b.selected = make(map[int]bool)
 	b.selected[idx] = true
 	b.updateStatus()
