@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
       - name: Generate config
         run: |
           printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
@@ -50,11 +51,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
       - uses: msys2/setup-msys2@v2
         id: msys2
         with:
           msystem: MINGW64
           install: mingw-w64-x86_64-gcc
+          cache: true
       - name: Generate config
         shell: bash
         run: |
@@ -90,6 +93,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache: true
       - name: Generate config
         run: |
           printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
