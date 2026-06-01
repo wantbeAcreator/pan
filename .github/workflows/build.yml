@@ -22,15 +22,12 @@ jobs:
           go-version: '1.25'
       - name: Generate config
         run: |
-          cat > internal/oss/config.go << 'EOF'
-package oss
-const (
-    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-    BucketName      = "${{ secrets.OSS_BUCKET }}"
-)
-EOF
+          printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
+            "${{ secrets.OSS_ENDPOINT }}" \
+            "${{ secrets.OSS_ACCESS_KEY_ID }}" \
+            "${{ secrets.OSS_ACCESS_KEY_SECRET }}" \
+            "${{ secrets.OSS_BUCKET }}" \
+            > internal/oss/config.go
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="
@@ -55,15 +52,12 @@ EOF
           go-version: '1.25'
       - name: Generate config
         run: |
-          cat > internal/oss/config.go << 'EOF'
-package oss
-const (
-    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-    BucketName      = "${{ secrets.OSS_BUCKET }}"
-)
-EOF
+          printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
+            "${{ secrets.OSS_ENDPOINT }}" \
+            "${{ secrets.OSS_ACCESS_KEY_ID }}" \
+            "${{ secrets.OSS_ACCESS_KEY_SECRET }}" \
+            "${{ secrets.OSS_BUCKET }}" \
+            > internal/oss/config.go
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="
@@ -88,15 +82,12 @@ EOF
           go-version: '1.25'
       - name: Generate config
         run: |
-          cat > internal/oss/config.go << 'EOF'
-package oss
-const (
-    Endpoint        = "${{ secrets.OSS_ENDPOINT }}"
-    AccessKeyID     = "${{ secrets.OSS_ACCESS_KEY_ID }}"
-    AccessKeySecret = "${{ secrets.OSS_ACCESS_KEY_SECRET }}"
-    BucketName      = "${{ secrets.OSS_BUCKET }}"
-)
-EOF
+          printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
+            "${{ secrets.OSS_ENDPOINT }}" \
+            "${{ secrets.OSS_ACCESS_KEY_ID }}" \
+            "${{ secrets.OSS_ACCESS_KEY_SECRET }}" \
+            "${{ secrets.OSS_BUCKET }}" \
+            > internal/oss/config.go
       - name: Verify config
         run: |
           echo "=== Checking config.go (hiding values) ==="
