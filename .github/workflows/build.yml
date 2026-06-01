@@ -70,7 +70,9 @@ jobs:
           grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
       - name: Build Windows
         shell: msys2 {0}
-        run: make windows-native
+        run: |
+          mkdir -p dist
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -ldflags="-s -w" -o dist/pan-windows-amd64.exe .
       - uses: actions/upload-artifact@v4
         with:
           name: pan-windows-amd64
