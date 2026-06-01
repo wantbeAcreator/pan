@@ -20,6 +20,9 @@ windows:
 		exit 1; \
 	fi
 
+windows-native:
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -ldflags="-s -w" -o dist/pan-windows-amd64.exe .
+
 darwin-native:
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags="-s -w" -o dist/pan-darwin-amd64 .
 

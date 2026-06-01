@@ -44,13 +44,18 @@ jobs:
           path: dist/pan-linux-amd64
 
   windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc
       - name: Generate config
+        shell: msys2 {0}
         run: |
           printf 'package oss\nconst (\n    Endpoint        = "%s"\n    AccessKeyID     = "%s"\n    AccessKeySecret = "%s"\n    BucketName      = "%s"\n)\n' \
             "${{ secrets.OSS_ENDPOINT }}" \
@@ -59,15 +64,13 @@ jobs:
             "${{ secrets.OSS_BUCKET }}" \
             > internal/oss/config.go
       - name: Verify config
+        shell: msys2 {0}
         run: |
           echo "=== Checking config.go (hiding values) ==="
           grep -c '=""' internal/oss/config.go && echo "WARNING: some secrets are empty!" && exit 1 || echo "OK: all secrets are set"
-      - name: Install mingw-w64
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-mingw-w64-x86-64
       - name: Build Windows
-        run: make windows
+        shell: msys2 {0}
+        run: make windows-native
       - uses: actions/upload-artifact@v4
         with:
           name: pan-windows-amd64
