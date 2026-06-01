@@ -51,6 +51,7 @@ jobs:
         with:
           go-version: '1.25'
       - uses: msys2/setup-msys2@v2
+        id: msys2
         with:
           msystem: MINGW64
           install: mingw-w64-x86_64-gcc
@@ -72,8 +73,10 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist
+          $msys2Location = "${{ steps.msys2.outputs.msys2-location }}"
           $env:CGO_ENABLED = "1"
-          $env:CC = "C:\msys64\mingw64\bin\gcc.exe"
+          $env:CC = "$msys2Location\mingw64\bin\gcc.exe"
+          Write-Host "Using CC=$env:CC"
           go build -ldflags="-s -w" -o dist\pan-windows-amd64.exe .
       - uses: actions/upload-artifact@v4
         with:
